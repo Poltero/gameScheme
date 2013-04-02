@@ -1,8 +1,8 @@
 ;;; Copyright (c) 2012 by Álvaro Castro Castilla
 ;;; Test for Cairo with OpenGL
 
-
-(define-structure world gamestates)
+(define-structure box posx posy width height)
+(define-structure world gamestates positionstates box)
 
 (define (main)
   ((fusion:create-simple-gl-cairo '(width: 1280 height: 752))
@@ -23,7 +23,15 @@
            (cond ((= key SDLK_ESCAPE)
                   'exit)
                  ((= key SDLK_RETURN)
-                  (make-world 'gamescreen))
+                  (make-world 'gamescreen 'none (world-box world)))
+                 ((= key SDLK_LEFT)
+                  (if (eq? (world-gamestates world) 'gamescreen)
+                      (make-world (world-gamestates world) 'left (world-box world))
+                      world))
+                 ((= key SDLK_RIGHT)
+                  (if (eq? (world-gamestates world) 'gamescreen)
+                      (make-world (world-gamestates world) 'right (world-box world))
+                      world))
                  (else
                   (SDL_LogVerbose SDL_LOG_CATEGORY_APPLICATION (string-append "Key: " (number->string key)))
                   world))))
@@ -56,11 +64,16 @@
           (cairo_set_source_rgba cr 1.0 1.0 1.0 1.0)
           (cairo_set_font_size cr 90.0)
           (cairo_move_to cr 260.0 350.0)
-          (cairo_show_text cr "GAMESCREEN")))
+          (cairo_show_text cr "GAMESCREEN")
+
+
+          ))
        
    
       
        
        world))
    (make-world 
-    'splashscreen)))
+    'splashscreen 
+    'none
+    (make-box 100 100 50 50))))

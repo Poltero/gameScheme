@@ -29,15 +29,45 @@
                       world))
                  ((= key SDLK_LEFT)
                   (if (eq? (world-gamestates world) 'gamescreen)
-                      (make-world (world-gamestates world) (world-tiles world) (make-player (player-posx (world-player world)) (player-posy (world-player world)) (player-width (world-player world)) (player-height (world-player world)) 'left (player-hstate (world-player world))))
+                      (make-world 
+                       (world-gamestates world) 
+                       (world-tiles world) 
+                       (make-player 
+                        (player-posx (world-player world)) 
+                        (player-posy (world-player world)) 
+                        (player-width (world-player world)) 
+                        (player-height (world-player world)) 
+                        'left 
+                        (player-hstate (world-player world))))
+
                       world))
                  ((= key SDLK_RIGHT)
                   (if (eq? (world-gamestates world) 'gamescreen)
-                      (make-world (world-gamestates world) (world-tiles world) (make-player (player-posx (world-player world)) (player-posy (world-player world)) (player-width (world-player world)) (player-height (world-player world)) 'right (player-hstate (world-player world))))
+                      (make-world 
+                       (world-gamestates world) 
+                       (world-tiles world) 
+                       (make-player 
+                        (player-posx (world-player world)) 
+                        (player-posy (world-player world)) 
+                        (player-width (world-player world)) 
+                        (player-height (world-player world)) 
+                        'right 
+                        (player-hstate (world-player world))))
+                      
                       world))
                  ((= key SDLK_UP)
                   (if (and (eq? (world-gamestates world) 'gamescreen) (eq? (player-hstate (world-player world)) 'none))
-                      (make-world (world-gamestates world) (world-tiles world) (make-player (player-posx (world-player world)) (player-posy (world-player world)) (player-width (world-player world)) (player-height (world-player world)) (player-vstate (world-player world)) 'up))
+                      (make-world 
+                       (world-gamestates world) 
+                       (world-tiles world) 
+                       (make-player 
+                        (player-posx (world-player world)) 
+                        (player-posy (world-player world)) 
+                        (player-width (world-player world)) 
+                        (player-height (world-player world)) 
+                        (player-vstate (world-player world)) 
+                        'up))
+                     
                       world))
                  (else
                   ;;(SDL_LogVerbose SDL_LOG_CATEGORY_APPLICATION (string-append "Key: " (number->string key)))
@@ -49,15 +79,45 @@
                       (SDL_KeyboardEvent-keysym kevt))))
            (cond ((= key SDLK_LEFT)
                   (if (eq? (player-vstate (world-player world)) 'left)
-                      (make-world (world-gamestates world) (world-tiles world) (make-player (player-posx (world-player world)) (player-posy (world-player world)) (player-width (world-player world)) (player-height (world-player world)) 'none (player-hstate (world-player world))))
+                      (make-world
+                       (world-gamestates world) 
+                       (world-tiles world) 
+                       (make-player 
+                        (player-posx (world-player world)) 
+                        (player-posy (world-player world)) 
+                        (player-width (world-player world)) 
+                        (player-height (world-player world)) 
+                        'none 
+                        (player-hstate (world-player world))))
+                     
                       world))
                  ((= key SDLK_RIGHT)
                   (if (eq? (player-vstate (world-player world)) 'right)
-                      (make-world (world-gamestates world) (world-tiles world) (make-player (player-posx (world-player world)) (player-posy (world-player world)) (player-width (world-player world)) (player-height (world-player world)) 'none (player-hstate (world-player world))))
+                      (make-world 
+                       (world-gamestates world) 
+                       (world-tiles world) 
+                       (make-player 
+                        (player-posx (world-player world)) 
+                        (player-posy (world-player world)) 
+                        (player-width (world-player world)) 
+                        (player-height (world-player world)) 
+                        'none 
+                        (player-hstate (world-player world))))
+                      
                       world))
                  ((= key SDLK_UP)
                   (if (eq? (world-gamestates world) 'gamescreen)
-                      (make-world (world-gamestates world) (world-tiles world) (make-player (player-posx (world-player world)) (player-posy (world-player world)) (player-width (world-player world)) (player-height (world-player world)) (player-vstate (world-player world)) 'down))
+                      (make-world 
+                       (world-gamestates world) 
+                       (world-tiles world) 
+                       (make-player 
+                        (player-posx (world-player world)) 
+                        (player-posy (world-player world)) 
+                        (player-width (world-player world)) 
+                        (player-height (world-player world)) 
+                        (player-vstate (world-player world)) 
+                        'down))
+                     
                       world))
                  (else
                   world))))

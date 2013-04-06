@@ -174,24 +174,30 @@
 
 
           (if (eq? (player-vstate (world-player world)) 'left)
-             (player-posx-set! (world-player world) (- (player-posx (world-player world)) (* 0.3 delta-time))))
+             (let player-left ((player (world-player world)))
+               (player-posx-set! player (- (player-posx player) (* 0.3 delta-time)))))
 
           (if (eq? (player-vstate (world-player world)) 'right)
-             (player-posx-set! (world-player world) (+ (player-posx (world-player world)) (* 0.3 delta-time))))
+             (let player-right ((player (world-player world)))
+               (player-posx-set! player (+ (player-posx player) (* 0.3 delta-time)))))
           
+
           (if (eq? (player-hstate (world-player world)) 'up)
-             (player-posy-set! (world-player world) (- (player-posy (world-player world)) (* 0.3 delta-time))))
+              (let player-up ((player (world-player world)))
+                (player-posy-set! player (- (player-posy player) (* 0.3 delta-time)))))
 
           (if (eq? (player-hstate (world-player world)) 'down)
-             (if (< (player-posy (world-player world)) 360)
-                 (player-posy-set! (world-player world) (+ (player-posy (world-player world)) (* 0.3 delta-time)))
+              (if (< (player-posy (world-player world)) 360)
+                 (let player-down ((player (world-player world)))
+                   (player-posy-set! player (+ (player-posy player) (* 0.3 delta-time))))
                  (player-hstate-set! (world-player world) 'none)))
           
           
 
-          ;; pintar el personaje
+          ;; Drawing player
           (cairo_set_source_rgba cr 1.0 1.0 1.0 1.0)
-          (cairo_rectangle cr (player-posx (world-player world)) (player-posy (world-player world)) (player-width (world-player world)) (player-height (world-player world)))
+          (let drawing-player ((player (world-player world)))
+            (cairo_rectangle cr (player-posx player) (player-posy player) (player-width player) (player-height player)))
           (cairo_fill cr)
 
 

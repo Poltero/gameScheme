@@ -1,14 +1,24 @@
 ;;; Copyright (c) 2012 by Álvaro Castro Castilla
 ;;; Test for Cairo with OpenGL
 
-(define-structure tile posx width height)
+(define-structure tile posx posy width height)
 (define-structure player posx posy width height vstate hstate)
-(define-structure world gamestates tiles player)
+(define-structure world gamestates tile player)
+
+(define collision-tile
+  (lambda (player tile)
+    (if (and (or (> (player-posx player) (tile-posx tile)) (> (+ (player-posx player) (player-width player)) (tile-posx tile)))
+                     (< (player-posx player) (+ (tile-posx tile) (tile-width tile)))
+                     (> (- (player-posy player) (player-height player)) (- (tile-posy tile) (tile-height tile)))
+                     (< (- (player-posy player) (player-height player)) (tile-posy tile)))
+        #t
+        #f)))
+
 
 (define (main)
   ((fusion:create-simple-gl-cairo '(width: 1280 height: 752))
    (lambda (event world)
-     (println (string-append "event: " (object->string event) " ; world: " (object->string world)))
+     ;;(println (string-append "event: " (object->string event) " ; world: " (object->string world)))
      (let ((type (SDL_Event-type event)))
        (cond
         ((= type SDL_QUIT)
@@ -25,13 +35,13 @@
                   'exit)
                  ((= key SDLK_RETURN)
                   (if (eq? (world-gamestates world) 'splashscreen)
-                      (make-world 'gamescreen (world-tiles world) (make-player 250.0 360.0 30.0 30.0 'none 'none))
+                      (make-world 'gamescreen (world-tile world) (make-player 250.0 360.0 30.0 30.0 'none 'none))
                       world))
                  ((= key SDLK_LEFT)
                   (if (eq? (world-gamestates world) 'gamescreen)
                       (make-world 
                        (world-gamestates world) 
-                       (world-tiles world) 
+                       (world-tile world) 
                        (make-player 
                         (player-posx (world-player world)) 
                         (player-posy (world-player world)) 
@@ -45,7 +55,7 @@
                   (if (eq? (world-gamestates world) 'gamescreen)
                       (make-world 
                        (world-gamestates world) 
-                       (world-tiles world) 
+                       (world-tile world) 
                        (make-player 
                         (player-posx (world-player world)) 
                         (player-posy (world-player world)) 
@@ -56,10 +66,10 @@
                       
                       world))
                  ((= key SDLK_UP)
-                  (if (and (eq? (world-gamestates world) 'gamescreen) (eq? (player-hstate (world-player world)) 'none))
+                  (if (eq? (world-gamestates world) 'gamescreen)
                       (make-world 
                        (world-gamestates world) 
-                       (world-tiles world) 
+                       (world-tile world) 
                        (make-player 
                         (player-posx (world-player world)) 
                         (player-posy (world-player world)) 
@@ -81,7 +91,7 @@
                   (if (eq? (player-vstate (world-player world)) 'left)
                       (make-world
                        (world-gamestates world) 
-                       (world-tiles world) 
+                       (world-tile world) 
                        (make-player 
                         (player-posx (world-player world)) 
                         (player-posy (world-player world)) 
@@ -95,7 +105,7 @@
                   (if (eq? (player-vstate (world-player world)) 'right)
                       (make-world 
                        (world-gamestates world) 
-                       (world-tiles world) 
+                       (world-tile world) 
                        (make-player 
                         (player-posx (world-player world)) 
                         (player-posy (world-player world)) 
@@ -109,7 +119,7 @@
                   (if (eq? (world-gamestates world) 'gamescreen)
                       (make-world 
                        (world-gamestates world) 
-                       (world-tiles world) 
+                       (world-tile world) 
                        (make-player 
                         (player-posx (world-player world)) 
                         (player-posy (world-player world)) 
@@ -128,7 +138,7 @@
      (lambda (cr time world)
        (set! delta-time (- time last-time))
        (set! last-time time)
-       (println (string-append "time: " (object->string time) " ; world: " (object->string world)))
+       ;(println (string-append "time: " (object->string time) " ; world: " (object->string world)))
        ;;(SDL_LogInfo SDL_LOG_CATEGORY_APPLICATION (object->string (SDL_GL_Extension_Supported "GL_EXT_texture_format_BGRA8888")))
 
        (case (world-gamestates world)
@@ -169,8 +179,20 @@
                        (loop (- count-tiles 1) (+ posx 20.0)))))
 
           
+          ;;paint tile test
+
+          (let paint-tile-test ((tile (world-tile world)))
+            (cairo_set_source_rgba cr 1.0 1.0 1.0 1.0)
+            (cairo_rectangle cr (tile-posx tile) (tile-posy tile) (tile-width tile) (tile-height tile))
+            (cairo_fill cr))
 
 
+          (if (collision-tile (world-player world) (world-tile world))
+              (println "Collision!")
+              (println "Nothing!"))
+          
+
+          
 
 
           (if (eq? (player-vstate (world-player world)) 'left)
@@ -187,10 +209,11 @@
                 (player-posy-set! player (- (player-posy player) (* 0.3 delta-time)))))
 
           (if (eq? (player-hstate (world-player world)) 'down)
-              (if (< (player-posy (world-player world)) 360)
+              (if (and (< (player-posy (world-player world)) 360) (not (collision-tile (world-player world) (world-tile world))))
                  (let player-down ((player (world-player world)))
                    (player-posy-set! player (+ (player-posy player) (* 0.3 delta-time))))
-                 (player-hstate-set! (world-player world) 'none)))
+                 ;(player-hstate-set! (world-player world) 'none)
+                 ))
           
           
 
@@ -209,5 +232,5 @@
        world))
    (make-world 
     'splashscreen
-    (make-tile 0 20 20)
+    (make-tile 200.0 350.0 50.0 50.0)
     'none)))

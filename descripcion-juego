@@ -1,0 +1,22 @@
+Plataformas (Titulo por definir)
+
+Descripcion:
+	Juego de plataformas al estilo Mario Bros, pero con el añadido de que el la camara se va moviendo automaticamente y si el personaje se sale de la pantalla pierde
+	En el juego aparacen esporadicamente enemigos que incluso quizas pueden disparar
+
+Carasteristicas:
+	- Nº de pantallas:
+		Indefinido
+	- Elementos que aparecen: 
+		-> Player
+		-> Enemigos
+		-> Plataformas
+	- Modos de juego:
+		El modo de juego es basicamente el de ir avanzando por los niveles y que cada nivel tiene al final un "jefe" final
+		Seria como un modo "Historia".
+	
+	- Caracteristicas tecnicas:
+		Cada elemento de las plataformas se compone de tiles de 40x40
+		El player se compone de un unico tile de 30x30
+	
+

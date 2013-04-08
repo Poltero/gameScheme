@@ -261,10 +261,10 @@
           
           
 
+          (if (and (not(eq? (player-hstate (world-player world)) 'left)) (not (eq? (player-hstate (world-player world)) 'right)))
+              (let decrement-position-player ((player (world-player world)))
+                (player-posx-set! player (- (player-posx player) (* 0.09 delta-time)))))
 
-          ;; (if (and (not( eq? (player-hstate (world-player world)) 'left)) (not (eq? (player-hstate (world-player world)) 'right)) (not (eq? (player-vstate (world-player world))) 'up) (not (eq? (player-vstate (world-player world))) 'down))
-          ;;     (let decrement-position-player ((player (world-player world)))
-          ;;       (player-posx-set! player (- (player-posx player) (* 0.09 delta-time)))))
 
           ;; Drawing player
           (cairo_set_source_rgba cr 1.0 1.0 1.0 1.0)

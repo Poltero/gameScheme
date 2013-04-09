@@ -2,12 +2,13 @@
 ;;; Test for Cairo with OpenGL
 
 (define-structure tile posx posy width height)
+(define-structure enemy posx posy width height)
 (define-structure player posx posy width height vstate hstate)
-(define-structure world gamestates tiles player)
+(define-structure world gamestates tiles player enemy)
 
-(define map-world '#(#(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)
-                     #(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)
-                     #(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)))
+(define map-world '#(#(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1) ; posicion superior
+                     #(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1) ; posicion medio
+                     #(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1))) ; posicion suelo
 
 (define collision-tiles
   (lambda (player tileslist)
@@ -87,7 +88,12 @@
                         30.0 
                         30.0 
                         'none 
-                        'none))
+                        'none)
+                       (make-enemy
+                        0.0
+                        200.0
+                        100.0
+                        200.0))
                       world))
                  ((= key SDLK_LEFT)
                   (if (eq? (world-gamestates world) 'gamescreen)
@@ -100,7 +106,8 @@
                         (player-width (world-player world)) 
                         (player-height (world-player world)) 
                         'left 
-                        (player-hstate (world-player world))))
+                        (player-hstate (world-player world)))
+                       (world-enemy world))
 
                       world))
                  ((= key SDLK_RIGHT)
@@ -114,7 +121,8 @@
                         (player-width (world-player world)) 
                         (player-height (world-player world)) 
                         'right 
-                        (player-hstate (world-player world))))
+                        (player-hstate (world-player world)))
+                       (world-enemy world))
                       
                       world))
                  ((= key SDLK_UP)
@@ -128,7 +136,8 @@
                         (player-width (world-player world)) 
                         (player-height (world-player world)) 
                         (player-vstate (world-player world)) 
-                        'up))
+                        'up)
+                       (world-enemy world))
                      
                       world))
                  (else
@@ -150,7 +159,9 @@
                         (player-width (world-player world)) 
                         (player-height (world-player world)) 
                         'none 
-                        (player-hstate (world-player world))))
+                        (player-hstate (world-player world)))
+                       (world-enemy world))
+                      
                      
                       world))
                  ((= key SDLK_RIGHT)
@@ -162,9 +173,10 @@
                         (player-posx (world-player world)) 
                         (player-posy (world-player world)) 
                         (player-width (world-player world)) 
-                        (player-height (world-player world)) 
-                        'none 
-                        (player-hstate (world-player world))))
+                        (player-height (world-player world))
+                        'none
+                        (player-hstate (world-player world)))
+                       (world-enemy world))
                       
                       world))
                  ((= key SDLK_UP)
@@ -176,9 +188,10 @@
                         (player-posx (world-player world)) 
                         (player-posy (world-player world)) 
                         (player-width (world-player world)) 
-                        (player-height (world-player world)) 
+                        (player-height (world-player world))
                         (player-vstate (world-player world)) 
-                        'down))
+                        'down)
+                       (world-enemy world))
                      
                       world))
                  (else
@@ -318,6 +331,13 @@
           ;; (cairo_rectangle cr (+ 250.0 20) 360.0 10.0 10.0)
           ;; (cairo_fill cr)
 
+
+
+          ;; Drawing enemy principal
+          (cairo_set_source_rgba cr 1.0 0.0 0.0 1.0)
+          (let drawing-enemy-principal ((enemy (world-enemy world)))
+            (cairo_rectangle cr (enemy-posx enemy) (enemy-posy enemy) (enemy-width enemy) (enemy-height enemy)))
+          (cairo_fill cr)
           
           ))
        
@@ -328,4 +348,5 @@
    (make-world 
     'splashscreen
     '()
+    'none
     'none)))

@@ -21,6 +21,43 @@
               (loop (cdr rest)))))))
 
 
+(define collision-down-tiles
+  (lambda (player tileslist)
+    (let loop ((rest tileslist))
+      (unless (null? rest)
+          (if (and 
+               (or (> (player-posx player) (tile-posx (car rest))) (> (+ (player-posx player) 15) (tile-posx (car rest))))
+                   (< (player-posx player) (+ (tile-posx (car rest)) 40))
+                   (> (player-posy player) (- (tile-posy (car rest)) 20))
+                   (< (player-posy player) (tile-posy (car rest))))
+              #t
+              (loop (cdr rest)))))))
+
+(define collision-top-tiles
+  (lambda (player tileslist)
+    (let loop ((rest tileslist))
+      (unless (null? rest)
+          (if (and 
+               (or (> (player-posx player) (tile-posx (car rest))) (> (+ (player-posx player) 15) (tile-posx (car rest))))
+                   (< (player-posx player) (+ (tile-posx (car rest)) 40))
+                   (< (+ (player-posy player) 15) (-  (tile-posy (car rest)) 20))
+                   (> (+ (player-posy player) 15) (tile-posy (car rest))))
+              #t
+              (loop (cdr rest)))))))
+
+
+;; (define collision-down-tile
+;;   (lambda (player tilelist)
+;;     (let loop ((rest tilelist))
+;;       (unless (null? rest)
+;;               (if (and (or (> (player-posx player) (tile-posx (car rest))) (> (+ (player-posx player) (player-width player)) (tile-posx (car rest))))
+;;                    (< (player-posx player) (+ (tile-posx (car rest)) (tile-width (car rest))))
+;;                    (< (- (player-posy player) (- ( player-height player) 20)) (tile-posy (car rest)))
+;;                    )
+                  
+;;                   #t
+;;                   (loop (cdr rest)))))))
+
 (define (main)
   ((fusion:create-simple-gl-cairo '(width: 1280 height: 752))
    (lambda (event world)
@@ -153,7 +190,7 @@
      (lambda (cr time world)
        (set! delta-time (- time last-time))
        (set! last-time time)
-       (println (string-append "time: " (object->string time) " ; world: " (object->string world)))
+      ;(println (string-append "time: " (object->string time) " ; world: " (object->string world)))
        ;;(SDL_LogInfo SDL_LOG_CATEGORY_APPLICATION (object->string (SDL_GL_Extension_Supported "GL_EXT_texture_format_BGRA8888")))
 
        (case (world-gamestates world)
@@ -233,6 +270,7 @@
             (if (not (null? rest))
                 (begin
                   (tile-posx-set! (car rest) (- (tile-posx (car rest)) (* 0.09 delta-time)))
+                  ;(tile-posx-set! (car rest) 500.0)
                   (cairo_rectangle cr (tile-posx (car rest)) (tile-posy (car rest)) (tile-width (car rest)) (tile-height (car rest)))
                   (loop (cdr rest)))
                 '()))
@@ -248,16 +286,21 @@
                (player-posx-set! player (+ (player-posx player) (* 0.3 delta-time)))))
           
 
-          (if (and (eq? (player-hstate (world-player world)) 'up) (not (collision-tiles (world-player world) (world-tiles world))))
+          (if (and (eq? (player-hstate (world-player world)) 'up))
               (let player-up ((player (world-player world)))
-                (player-posy-set! player (- (player-posy player) (* 0.3 delta-time)))))
+                (player-posy-set! player (- (player-posy player) (* 0.3 delta-time))))
+              )
 
-          (if (eq? (player-hstate (world-player world)) 'down)
-              (if (and (< (player-posy (world-player world)) 370) (not (collision-tiles (world-player world) (world-tiles world))))
+          (if (and (eq? (player-hstate (world-player world)) 'down) (not (collision-down-tiles (world-player world) (world-tiles world))))
+              (if (and (< (player-posy (world-player world)) 370))
                  (let player-down ((player (world-player world)))
                    (player-posy-set! player (+ (player-posy player) (* 0.3 delta-time))))
                  ;(player-posy-set! (world-player world) (+ (player-posy (world-player world)) 20))
-                 ))
+                ))
+
+
+          ;; (if (collision-down-tiles (world-player world) (world-tiles world))
+          ;;     (println "Collision Down!"))
           
           
 
@@ -271,8 +314,11 @@
           (let drawing-player ((player (world-player world)))
             (cairo_rectangle cr (player-posx player) (player-posy player) (player-width player) (player-height player)))
           (cairo_fill cr)
+          
+          ;; (cairo_rectangle cr (+ 250.0 20) 360.0 10.0 10.0)
+          ;; (cairo_fill cr)
 
-
+          
           ))
        
    

@@ -29,7 +29,7 @@
           (if (and 
                (or (> (player-posx player) (tile-posx (car rest))) (> (+ (player-posx player) 15) (tile-posx (car rest))))
                    (< (player-posx player) (+ (tile-posx (car rest)) 40))
-                   (> (player-posy player) (- (tile-posy (car rest)) 20))
+                   (> (player-posy player) (- (tile-posy (car rest)) 30))
                    (< (player-posy player) (tile-posy (car rest))))
               #t
               (loop (cdr rest)))))))
@@ -40,9 +40,9 @@
       (unless (null? rest)
           (if (and 
                (or (> (player-posx player) (tile-posx (car rest))) (> (+ (player-posx player) 15) (tile-posx (car rest))))
-                   (< (player-posx player) (+ (tile-posx (car rest)) 40))
-                   (< (+ (player-posy player) 15) (-  (tile-posy (car rest)) 20))
-                   (> (+ (player-posy player) 15) (tile-posy (car rest))))
+               (< (player-posx player)  (+ ( tile-posx (car rest)) 40))
+               (> (player-posy player) (tile-posy (car rest)))
+               (< (- (player-posy player) 40) (tile-posy (car rest))))
               #t
               (loop (cdr rest)))))))
 
@@ -299,9 +299,10 @@
                (player-posx-set! player (+ (player-posx player) (* 0.3 delta-time)))))
           
 
-          (if (and (eq? (player-hstate (world-player world)) 'up))
+          (if (and (eq? (player-hstate (world-player world)) 'up) (not (collision-top-tiles (world-player world) (world-tiles world))))
               (let player-up ((player (world-player world)))
                 (player-posy-set! player (- (player-posy player) (* 0.3 delta-time))))
+              ;(player-vstate-set! (world-player world) 'down)
               )
 
           (if (and (eq? (player-hstate (world-player world)) 'down) (not (collision-down-tiles (world-player world) (world-tiles world))))
@@ -312,8 +313,8 @@
                 ))
 
 
-          ;; (if (collision-down-tiles (world-player world) (world-tiles world))
-          ;;     (println "Collision Down!"))
+          (if (collision-down-tiles (world-player world) (world-tiles world))
+              (println "Collision Down!"))
           
           
 

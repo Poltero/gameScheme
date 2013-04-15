@@ -3,10 +3,10 @@
 
 (define-structure tile posx posy width height)
 (define-structure camera position state)
-(define-structure enemy posx posy width height)
+(define-structure enemy posx posy width height points color)
 (define-structure player posx posy width height vstate hstate score)
 (define-structure coin posx posy width height points color)
-(define-structure world gamestates tiles camera player coins message)
+(define-structure world gamestates tiles camera player coins enemies message)
 
 
 
@@ -31,8 +31,8 @@
 (define new-map-world '#(#(0 0 0 + 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
                          #(0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 ++ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
                          #(0 0 0 0 0 0 0 0 +++ 0 0 + 0 0 0 0 0 0 + i i i 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 + 0 0 0 0 0 0 0 0 0 + 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
-                         #(+ 0 1 0 0 0 0 0 0 0 0 0 i i i 0 0 0 0 i 0 0 0 0 0 0 +++ 1 1 + 1 i 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
-                         #(+++ + 1 1 + 1 1 ++ ++ + 0 0 + 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 ++ 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 + 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 1 1 1 1 1 1 1 1 1 1 1 1 + 1 1 1 1 1 1 1 1 1 1 1 1 1)
+                         #(+ 0 1 0 0 0 0 0 0 0 0 * i i i 0 0 0 0 i 0 0 0 0 0 0 +++ 1 1 + 1 i 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+                         #(+++ + 1 1 * 1 1 ++ ++ + 0 0 + 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 ++ 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 + 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 1 1 1 1 1 1 1 1 1 1 1 1 + 1 1 1 1 1 1 1 1 1 1 1 1 1)
                          ))
 
 ;Screen
@@ -68,15 +68,27 @@
               #t
               (loop (cdr rest)))))))
 
+(define collision-down-tiles-enemy
+  (lambda (enemy tileslist)
+    (let loop ((rest tileslist))
+      (unless (null? rest)
+          (if (and 
+               (or (> (enemy-posx enemy) (tile-posx (car rest))) (> (+ (enemy-posx enemy) 15) (tile-posx (car rest))))
+                   (< (enemy-posx enemy) (+ (tile-posx (car rest)) 40))
+                   (> (enemy-posy enemy) (- (tile-posy (car rest)) 36))
+                   (< (enemy-posy enemy) (tile-posy (car rest))))
+              #t
+              (loop (cdr rest)))))))
+
 (define collision-right-tiles
   (lambda (player tileslist)
     (let loop ((rest tileslist))
       (unless (null? rest)
           (if (and 
-               ;(or (> (player-posx player) (tile-posx (car rest))) (> (+ (player-posx player) 15) (tile-posx (car rest))))
-               (< (+ (player-posx player) 40) (+ (tile-posx (car rest)) 40))
-               (> (player-posy player) (- (tile-posy (car rest)) 40))
-               (< (player-posy player)  (tile-posy (car rest))))
+               (or (> (player-posx player) (tile-posx (car rest))) (> (+ (player-posx player) 15) (tile-posx (car rest))))
+               (> (+ (player-posx player) 40) (tile-posx (car rest)))
+               (> (player-posy player) (tile-posy (car rest)))
+               (< (- (player-posy player) 30) (tile-posy (car rest))))
               #t
               (loop (cdr rest)))))))
 
@@ -133,7 +145,7 @@
     (if (< count-y 5)
         (begin
           (let create-plataforms ((element (vector-ref (vector-ref rest-map count-y) count-x)))
-            (if (or (eq? element 1) (eq? element '+))
+            (if (or (eq? element 1) (eq? element '+) (eq? element '*))
                 (let create-plataform-normal ((number 0) (posx (+ (+ 0 (* 40 4)) (* count-x 100))))
                   (if (< number 4)
                       (begin
@@ -181,6 +193,19 @@
               (loop rest-map rest 0 (+ count-y 1))))
         rest)))
 
+(define (create-enemies-map l)
+  (let loop ((rest-map new-map-world) (rest l) (count-x 0) (count-y 0))
+    (if (< count-y 5)
+        (begin
+          (case (vector-ref (vector-ref rest-map count-y) count-x)
+            ((*)
+             (let create-enemy-normal ((posx (+ (+ 0 (* 40 4)) (* count-x 100))))
+               (set! rest (cons (make-enemy (exact->inexact (+ posx 10)) (exact->inexact (* (+ 0.7 count-y) 99)) 40.0 40.0 10 'blue) rest)))))
+          (if (< count-x 101)
+              (loop rest-map rest (+ count-x 1) count-y)
+              (loop rest-map rest 0 (+ count-y 1))))
+        rest)))
+
 
 
 (define (main)
@@ -208,17 +233,18 @@
                        (create-tiles-map (world-tiles world))
                        (make-camera
                         0.0
-                        'auto)
+                        'on)
                        (make-player
                         400.0
-                        487.0 
+                        450.0 
                         30.0
                         30.0
-                        'none 
                         'none
+                        'down
                         0)
                        (create-coins-map (world-coins world))
-                       "PRESS UP! TO START")
+                       (create-enemies-map (world-enemies world))
+                       "")
                              
                       world))
 
@@ -237,6 +263,7 @@
                         (player-hstate (world-player world))
                         (player-score (world-player world)))
                        (world-coins world)
+                       (world-enemies world)
                        (world-message world))
 
                       world))
@@ -255,6 +282,7 @@
                         (player-hstate (world-player world))
                         (player-score (world-player world)))
                        (world-coins world)
+                       (world-enemies world)
                        (world-message world))
                       
                       world))
@@ -273,6 +301,7 @@
                         'up
                         (player-score (world-player world)))
                        (world-coins world)
+                       (world-enemies world)
                        (world-message world))
                      
                       world))
@@ -299,6 +328,7 @@
                         (player-hstate (world-player world))
                         (player-score (world-player world)))
                        (world-coins world)
+                       (world-enemies world)
                        (world-message world))
                       
                      
@@ -318,6 +348,7 @@
                         (player-hstate (world-player world))
                         (player-score (world-player world)))
                        (world-coins world)
+                       (world-enemies world)
                        (world-message world))
                       
                       world))
@@ -336,6 +367,7 @@
                         'down
                         (player-score (world-player world)))
                        (world-coins world)
+                       (world-enemies world)
                        (world-message world))
                      
                       world))
@@ -344,11 +376,11 @@
 
         (else
          world))))
-   (let ((last-time 0) (delta-time 0) (last-posx 0))
+   (let ((last-time 0) (delta-time 0) (last-posx 0) (mov #t))
      (lambda (cr time world)
        (set! delta-time (- time last-time))
        (set! last-time time)
-       ;(println (string-append "time: " (object->string time) " ; coins: " (object->string  (world-coins world)) " ListaMetodo: N/D" ))
+       ;(println (string-append "time: " (object->string time) " ; enemies " (object->string  mov) " ListaMetodo: N/D" ))
        ;;(SDL_LogInfo SDL_LOG_CATEGORY_APPLICATION (object->string (SDL_GL_Extension_Supported "GL_EXT_texture_format_BGRA8888")))
        
        
@@ -544,6 +576,21 @@
                   (cairo_fill cr)
                   (loop (cdr rest)))
                 '()))
+
+          ;;Drawing all enemies 
+          (cairo_set_source_rgba cr 0.0 0.0 1.0 0.9)
+          (let loop ((rest (world-enemies world)))
+            (if (not (null? rest))
+                (begin
+                  (if (not (collision-down-tiles-enemy (car rest) (world-tiles world)))
+                      (begin
+                        (enemy-posx-set! (car rest) (- (enemy-posx (car rest)) (* 0.1 delta-time)))
+                        (enemy-posy-set! (car rest) (+ (enemy-posy (car rest)) (* 0.1 delta-time))))
+                      (enemy-posx-set! (car rest) (- (enemy-posx (car rest)) (* 0.1 delta-time))))
+                  (cairo_rectangle cr (exact->inexact (- (enemy-posx  (car rest)) (camera-position (world-camera world)))) (exact->inexact (enemy-posy (car rest))) (enemy-width (car rest)) (enemy-height (car rest)))
+                  (cairo_fill cr)
+                  (loop (cdr rest)))
+                '()))
           
 
 
@@ -555,7 +602,7 @@
                  (if (eq? (camera-state camera) 'on)
                      (camera-position-set! camera (- (camera-position camera) (* 0.3 delta-time)))))))
 
-          (if (eq? (player-vstate (world-player world)) 'right)
+          (if (and (eq? (player-vstate (world-player world)) 'right) (not (collision-right-tiles (world-player world) (world-tiles world))))
              (let player-right ((camera (world-camera world)) (tiles (world-tiles world)) (player (world-player world)))
                (begin
                  (player-posx-set! player (+ (player-posx player) (* 0.3 delta-time)))
@@ -662,5 +709,6 @@
     '()
     'none
     'none
+    '()
     '()
     "")))

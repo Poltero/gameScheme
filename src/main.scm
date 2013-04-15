@@ -28,8 +28,8 @@
 ;;                      #(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1) ; posicion medio
 ;;                      #(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1))) ; posicion suelo
 
-(define new-map-world '#(#(0 0 0 + 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
-                         #(0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 ++ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+(define new-map-world '#(#(0 0 0 0 0 0 ++ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+                         #(0 0 0 0 0 0 0 0 0 0 0 1 0 0 + 0 0 0 0 0 0 0 0 ++ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
                          #(0 0 0 0 0 0 0 0 +++ 0 0 + 0 0 0 0 0 0 + i i i 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 + 0 0 0 0 0 0 0 0 0 + 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
                          #(+ 0 1 0 0 0 0 0 0 0 0 * i i i 0 0 0 0 i 0 0 0 0 0 0 +++ 1 1 + 1 i 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
                          #(+++ + 1 1 * 1 1 ++ ++ + 0 0 + 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 ++ 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 + 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 1 1 1 1 1 1 1 1 1 1 1 1 + 1 1 1 1 1 1 1 1 1 1 1 1 1)
@@ -63,7 +63,7 @@
           (if (and 
                (or (> (player-posx player) (tile-posx (car rest))) (> (+ (player-posx player) 15) (tile-posx (car rest))))
                    (< (player-posx player) (+ (tile-posx (car rest)) 40))
-                   (> (player-posy player) (- (tile-posy (car rest)) 36))
+                   (> (player-posy player) (- (tile-posy (car rest)) 30))
                    (< (player-posy player) (tile-posy (car rest))))
               #t
               (loop (cdr rest)))))))
@@ -364,7 +364,7 @@
                         (player-width (world-player world)) 
                         (player-height (world-player world))
                         (player-vstate (world-player world)) 
-                        'down
+                        (player-hstate (world-player world))
                         (player-score (world-player world)))
                        (world-coins world)
                        (world-enemies world)
@@ -376,11 +376,11 @@
 
         (else
          world))))
-   (let ((last-time 0) (delta-time 0) (last-posx 0) (mov #t))
+   (let ((last-time 0) (delta-time 0) (last-posx 0) (mov #t) (position-y-origin 0))
      (lambda (cr time world)
        (set! delta-time (- time last-time))
        (set! last-time time)
-       ;(println (string-append "time: " (object->string time) " ; enemies " (object->string  mov) " ListaMetodo: N/D" ))
+       (println (string-append "Position y origin: " (number->string position-y-origin) " position-y: " (object->string (world-player world))))
        ;;(SDL_LogInfo SDL_LOG_CATEGORY_APPLICATION (object->string (SDL_GL_Extension_Supported "GL_EXT_texture_format_BGRA8888")))
        
        
@@ -537,6 +537,9 @@
           ;;Generate all map
           
           
+
+          ;; (if (= position-y-origin 0)
+          ;;     (set! position-y-origin (player-posy (world-player world))))
           
         
           ;;Calculate points collision down and top
@@ -602,7 +605,7 @@
                  (if (eq? (camera-state camera) 'on)
                      (camera-position-set! camera (- (camera-position camera) (* 0.3 delta-time)))))))
 
-          (if (and (eq? (player-vstate (world-player world)) 'right) (not (collision-right-tiles (world-player world) (world-tiles world))))
+          (if (eq? (player-vstate (world-player world)) 'right)
              (let player-right ((camera (world-camera world)) (tiles (world-tiles world)) (player (world-player world)))
                (begin
                  (player-posx-set! player (+ (player-posx player) (* 0.3 delta-time)))
@@ -614,15 +617,32 @@
           ;;     (player-posx-set! (world-player world) (+ (player-posx (world-player world)) (* 0.3 delta-time))))
 
           
+          (if (eq? (player-hstate (world-player world)) 'up) 
+              (if (collision-down-tiles (world-player world) (world-tiles world))
+                  (player-hstate-set! (world-player world) 'jump)
+                  (player-hstate-set! (world-player world) 'down)))
 
-          (if (and (eq? (player-hstate (world-player world)) 'up) (not (collision-top-tiles (world-player world) (world-tiles world))))
-              (let player-up ((player (world-player world)))
-                (player-posy-set! player (- (player-posy player) (* 0.3 delta-time)))))
+
+          (if (eq? (player-hstate (world-player world)) 'jump) 
+              (if (not (collision-top-tiles (world-player world) (world-tiles world)))
+                  (begin 
+                    (if (= position-y-origin (player-posy (world-player world)))
+                        (set! position-y-origin (- (player-posy (world-player world)) -50)))
+                    (let player-up ((player (world-player world)))
+                      (player-posy-set! player (- (player-posy player) (* 0.3 delta-time)))))
+                  (player-hstate-set! (world-player world) 'down)))
 
           (if (and (eq? (player-hstate (world-player world)) 'down) (not (collision-down-tiles (world-player world) (world-tiles world))))
               (let player-down ((player (world-player world)))
                 (player-posy-set! player (+ (player-posy player) (* 0.3 delta-time)))))
+          
 
+          ;Control limits jump
+          (if (> position-y-origin (player-posy (world-player world)))
+              (player-hstate-set! (world-player world) 'down))
+
+          
+          
           ;;Control limits Y
           (if (or (< (player-posy (world-player world)) 0) (> (+ (player-posy (world-player world)) (player-height (world-player world))) level-height))
               #f)

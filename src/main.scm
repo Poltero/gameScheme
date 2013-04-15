@@ -9,25 +9,6 @@
 (define-structure world gamestates tiles camera player coins enemies message)
 
 
-
-(define (filter pred lis)               ; Sleazing with EQ? makes this
-  (let recur ((lis lis))  
-    (if (null? lis) lis   ; Use NOT-PAIR? to handle dotted lists.
-        (let ((head (car lis))
-              (tail (cdr lis)))
-          (if (pred head)
-              (let ((new-tail (recur tail))) ; Replicate the RECUR call so
-                (if (eq? tail new-tail) lis
-                    (cons head new-tail)))
-              (recur tail))))))
-
-(define (remove pred lis) (filter (lambda (x) (not (pred x))) lis))
-
-
-;; (define map-world '#(#(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1) ; posicion superior
-;;                      #(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1) ; posicion medio
-;;                      #(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1))) ; posicion suelo
-
 (define new-map-world '#(#(0 0 0 0 0 0 ++ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
                          #(0 0 0 0 0 0 0 0 0 0 0 1 0 0 + 0 0 0 0 0 0 0 0 ++ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
                          #(0 0 0 0 0 0 0 0 +++ 0 0 + 0 0 0 0 0 0 + i i i 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 + 0 0 0 0 0 s 0 0 0 + 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
@@ -35,35 +16,51 @@
                          #(+++ + 1 1 * 1 1 ++ ++ + 0 0 + 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 ++ 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 + 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 1 1 1 1 1 1 1 1 1 1 1 1 + 1 1 1 1 1 1 1 1 1 1 1 1 1)
                          ))
 
-;Screen
-(define screen-width 300.0)
 
 ;Level dimensions
 (define level-width 30000.0)
 (define level-height 400.0)
 
+(define check-collision-player-with-coin
+  (lambda (player coin)
+    (let check-collision (
+                          (leftA (player-posx player))
+                          (rightA (+ (player-posx player) (player-width player)))
+                          (topA (player-posy player))
+                          (bottomA (+ (player-posy player) (player-height player)))
+                          (leftB (coin-posx coin))
+                          (rightB (+ (coin-posx coin) (coin-width coin)))
+                          (topB (coin-posy coin))
+                          (bottomB (+ (coin-posy coin) (coin-height coin))))
+      (if (<= bottomA topB)
+          #f
+          (if (>= topA bottomB)
+              #f
+              (if (<= rightA leftB)
+                  #f
+                  (if (>= leftA rightB)
+                      #f
+                      #t)))))))
 
-
-(define collision-tiles
-  (lambda (player tileslist)
-    (let loop ((rest tileslist))
+(define update-player-points-for-take-coin
+  (lambda (player coins)
+    (let loop ((rest coins))
       (unless (null? rest)
-          (if (and (or (> (player-posx player) (tile-posx (car rest))) (> (+ (player-posx player) (player-width player)) (tile-posx (car rest))))
-                   (< (player-posx player) (+ (tile-posx (car rest)) (tile-width (car rest))))
-                   (> (- (player-posy player) (- ( player-height player) 20)) (- (tile-posy (car rest)) (tile-height (car rest))))
-                   (< (- (player-posy player) (player-height player)) (tile-posy (car rest))))
-              #t
-              (loop (cdr rest)))))))
+              (if (check-collision-player-with-coin player (car rest))
+                  (begin
+                    (coin-posx-set! (car rest) -20)
+                    (player-score-set! player (+ (player-score player) (coin-points (car rest)))))
+                  (loop (cdr rest)))))))
 
 
 (define collision-down-tiles
   (lambda (player tileslist)
     (let loop ((rest tileslist))
       (unless (null? rest)
-          (if (and 
-               (or (> (player-posx player) (tile-posx (car rest))) (> (+ (player-posx player) 15) (tile-posx (car rest))))
+          (if (and
+               (or (> (player-posx player) (tile-posx (car rest))) (> (+ (player-posx player) 40) (tile-posx (car rest))))
                    (< (player-posx player) (+ (tile-posx (car rest)) 40))
-                   (> (player-posy player) (- (tile-posy (car rest)) 30))
+                   (> (player-posy player) (- (tile-posy (car rest)) 39))
                    (< (player-posy player) (tile-posy (car rest))))
               #t
               (loop (cdr rest)))))))
@@ -73,9 +70,9 @@
     (let loop ((rest tileslist))
       (unless (null? rest)
           (if (and 
-               (or (> (enemy-posx enemy) (tile-posx (car rest))) (> (+ (enemy-posx enemy) 15) (tile-posx (car rest))))
+               (or (> (enemy-posx enemy) (tile-posx (car rest))) (> (+ (enemy-posx enemy) 40) (tile-posx (car rest))))
                    (< (enemy-posx enemy) (+ (tile-posx (car rest)) 40))
-                   (> (enemy-posy enemy) (- (tile-posy (car rest)) 36))
+                   (> (enemy-posy enemy) (- (tile-posy (car rest)) 39))
                    (< (enemy-posy enemy) (tile-posy (car rest))))
               #t
               (loop (cdr rest)))))))
@@ -129,17 +126,6 @@
               #t
               (loop (cdr rest)))))))
 
-(define update-position-elements
-  (lambda (tiles player camera)
-    (player-posx-set! player (+ (player-posx player) (camera-position camera)))
-    (let loop ((rest tiles))
-      (if (not (null? rest))
-          (begin
-            (tile-posx-set! (car rest) (- (tile-posx  (car rest)) (camera-position camera)))
-            (loop (cdr rest)))
-          '()))))
-
-
 
 (define condition-short
   (lambda (condition values)
@@ -157,13 +143,13 @@
                   (if (< number 4)
                       (begin
                         (set! rest (cons (make-tile (exact->inexact posx) (exact->inexact (* (+ 0.7 count-y) 110)) 40.0 40.0) rest))
-                        (create-plataform-normal (+ number 1) (+ posx 40))))))
+                        (create-plataform-normal (+ number 1) (+ posx 39))))))
             (if (or (eq? element 2) (eq? element '+++))
                 (let create-plataform-double ((number 0) (posx (+ (+ 0 (* 40 4)) (* count-x 100))))
                   (if (< number 8)
                       (begin
                         (set! rest (cons (make-tile (exact->inexact posx) (exact->inexact (* (+ 0.7 count-y) 110)) 40.0 40.0) rest))
-                        (create-plataform-double (+ number 1) (+ posx 40))))))
+                        (create-plataform-double (+ number 1) (+ posx 39))))))
             (if (or (eq? element 'i) (eq? element '++))
                 (let create-unique-plataform ((posx (+ (+ 0 (* 40 4)) (* count-x 100))))
                   (set! rest (cons (make-tile (exact->inexact posx) (exact->inexact (* (+ 0.7 count-y) 110)) 40.0 40.0) rest)))))
@@ -389,55 +375,7 @@
        (set! delta-time (- time last-time))
        (set! last-time time)
        ;(println (string-append "Position camera " (object->string (world-camera world)) " position-x: " (object->string (world-player world))))
-       ;;(SDL_LogInfo SDL_LOG_CATEGORY_APPLICATION (object->string (SDL_GL_Extension_Supported "GL_EXT_texture_format_BGRA8888")))
-       
-       
-       ;; (let loop ((rest (world-tiles world)) (count 1))
-       ;;   (if (not (null? rest))
-       ;;       (loop (cdr rest) (+ count 1))
-       ;;       (println (string-append "Number of tiles: " (number->string count)))))
-       
-
-       ;; (if (eq? status-game 'idle)
-       ;;     (begin 
-       ;;       (let generate-map ((rest-map new-map-world) (count-y 0))
-       ;;         (if (< count-y 5)
-       ;;             (let create-plataforms ((count-x 0))
-       ;;               (if (< count-x 28)
-       ;;                   (if (eq? (vector-ref (vector-ref rest-map count-y) count-x) 1)
-       ;;                       (let create-plataform-normal ((counter 0))
-       ;;                         (if (< counter 4)
-       ;;                             (begin
-       ;;                               (world-tiles-set! world (cons (make-tile (exact->inexact (* 100 count-x)) (exact->inexact (+ (* 0.7 count-y) 200)) 40.0 40.0) (world-tiles world)))
-       ;;                               (create-plataform-normal (+ counter 1)))))
-       ;;                       '())
-       ;;                   '())
-       ;;               (create-plataforms (+ count-x 1))
-       ;;               ))
-       ;;         ;(generate-map rest-map (+ count-y 1))
-       ;;         )
-       ;;       (set! status-game 'new)))
-
-       ;(if (eq? status-game 'idle))
-       ;; (define metodo 
-       ;;   (lambda (world)
-       ;;     (begin 
-       ;;       (let loop-y ((rest-map new-map-world) (count-y 0))
-       ;;         (if (< count-y 5)
-       ;;             (begin
-       ;;               (let loop-x ((count-x 0))
-       ;;                 (if (< count-x 28)
-       ;;                     (begin
-       ;;                       (if (eq? (vector-ref (vector-ref rest-map count-y) count-x) 1)
-       ;;                           (world-tiles-set! world (cons (make-tile (exact->inexact (+ (* 100 count-x) 40)) (exact->inexact (+ (* 0.7 count-y) 200)) 40.0 40.0) (world-tiles world))))
-       ;;                       (loop-x (+ count-x 1)))))
-       ;;               (loop-y rest-map (+ count-y 1)))))
-       ;;       ;(set! status-game 'new)
-       ;;       )))
-
-
-
-       
+       ;;(SDL_LogInfo SDL_LOG_CATEGORY_APPLICATION (object->string (SDL_GL_Extension_Supported "GL_EXT_texture_format_BGRA8888")))                    
        
 
        (case (world-gamestates world)
@@ -502,17 +440,19 @@
 
           
         
-          ;;Calculate points collision down and top
-          (let coin-collided ((coin-collided-down (collision-down-coins (world-player world) (world-coins world))) (coin-collided-top (collision-top-coins (world-player world) (world-coins world))))
-            (if coin-collided-down
-                (begin
-                  (coin-posx-set! coin-collided-down -20)
-                  (player-score-set! (world-player world) (+ (player-score (world-player world)) (coin-points coin-collided-down)))))
-            (if coin-collided-top
-                (begin
-                  (coin-posx-set! coin-collided-top -20)
-                  (player-score-set! (world-player world) (+ (player-score (world-player world)) (coin-points coin-collided-top))))))
-          
+          ;; ;;Calculate points collision down and top
+          ;; (let coin-collided ((coin-collided-down (collision-down-coins (world-player world) (world-coins world))) (coin-collided-top (collision-top-coins (world-player world) (world-coins world))))
+          ;;   (if coin-collided-down
+          ;;       (begin
+          ;;         (coin-posx-set! coin-collided-down -20)
+          ;;         (player-score-set! (world-player world) (+ (player-score (world-player world)) (coin-points coin-collided-down)))))
+          ;;   (if coin-collided-top
+          ;;       (begin
+          ;;         (coin-posx-set! coin-collided-top -20)
+          ;;         (player-score-set! (world-player world) (+ (player-score (world-player world)) (coin-points coin-collided-top))))))
+
+
+          (update-player-points-for-take-coin (world-player world) (world-coins world))
           
           ;;Drawing and moving all tiles
           

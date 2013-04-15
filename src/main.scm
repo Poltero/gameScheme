@@ -2,7 +2,7 @@
 ;;; Test for Cairo with OpenGL
 
 (define-structure tile posx posy width height)
-(define-structure camera position state)
+(define-structure camera position state speed)
 (define-structure enemy posx posy width height points color)
 (define-structure player posx posy width height vstate hstate score)
 (define-structure coin posx posy width height points color)
@@ -30,7 +30,7 @@
 
 (define new-map-world '#(#(0 0 0 0 0 0 ++ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
                          #(0 0 0 0 0 0 0 0 0 0 0 1 0 0 + 0 0 0 0 0 0 0 0 ++ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
-                         #(0 0 0 0 0 0 0 0 +++ 0 0 + 0 0 0 0 0 0 + i i i 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 + 0 0 0 0 0 0 0 0 0 + 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+                         #(0 0 0 0 0 0 0 0 +++ 0 0 + 0 0 0 0 0 0 + i i i 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 + 0 0 0 0 0 s 0 0 0 + 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
                          #(+ 0 1 0 0 0 0 0 0 0 0 * i i i 0 0 0 0 i 0 0 0 0 0 0 +++ 1 1 + 1 i 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
                          #(+++ + 1 1 * 1 1 ++ ++ + 0 0 + 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 ++ 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 + 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 1 1 1 1 1 1 1 1 1 1 1 1 + 1 1 1 1 1 1 1 1 1 1 1 1 1)
                          ))
@@ -233,7 +233,8 @@
                        (create-tiles-map (world-tiles world))
                        (make-camera
                         0.0
-                        'on)
+                        'on
+                        0.2)
                        (make-player
                         400.0
                         450.0 
@@ -380,7 +381,7 @@
      (lambda (cr time world)
        (set! delta-time (- time last-time))
        (set! last-time time)
-       (println (string-append "Position y origin: " (number->string position-y-origin) " position-y: " (object->string (world-player world))))
+       (println (string-append "Position camera " (object->string (world-camera world)) " position-x: " (object->string (world-player world))))
        ;;(SDL_LogInfo SDL_LOG_CATEGORY_APPLICATION (object->string (SDL_GL_Extension_Supported "GL_EXT_texture_format_BGRA8888")))
        
        
@@ -654,7 +655,7 @@
           ;(camera-position-set! (world-camera world) (- (/ (+ (player-posx (world-player world)) (player-width (world-player world))) 2) (/ screen-width 2.0)))
 
           (if (eq? (camera-state (world-camera world)) 'auto)
-              (camera-position-set! (world-camera world) (+ (camera-position (world-camera world)) (* 0.1 delta-time))))
+              (camera-position-set! (world-camera world) (+ (camera-position (world-camera world)) (* (camera-speed (world-camera world)) delta-time))))
 
           
 
@@ -697,6 +698,10 @@
           
           ;;Lose player
           (if (> (player-posy (world-player world)) 750)
+              (world-gamestates-set! world 'lose))
+
+          ;;Que la camara te coma
+          (if (< (- (player-posx (world-player world)) (camera-position (world-camera world))) (* -1 (player-width (world-player world))))
               (world-gamestates-set! world 'lose))
 
 

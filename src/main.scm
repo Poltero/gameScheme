@@ -18,7 +18,7 @@
 
 
 ;Level dimensions
-(define level-width 100.0)
+(define level-width 10000.0)
 (define level-height 400.0)
 
 

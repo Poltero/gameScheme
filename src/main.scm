@@ -9,17 +9,18 @@
 (define-structure world gamestates tiles camera player coins enemies message)
 
 
-(define new-map-world '#(#(0 0 0 0 0 0 ++ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
-                         #(0 0 0 0 0 0 0 0 0 0 0 1 0 0 + 0 0 0 0 0 0 0 0 ++ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
-                         #(0 0 0 0 0 0 0 0 +++ 0 0 + 0 0 0 0 0 0 + i i i 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 + 0 0 0 0 0 s 0 0 0 + 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
-                         #(+ 0 1 0 0 0 0 0 0 0 0 * i i i 0 0 0 0 i 0 0 0 0 0 0 +++ 1 1 + 1 i 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
-                         #(+++ + 1 1 * 1 1 ++ ++ + 0 0 + 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 ++ 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 + 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 1 1 1 1 1 1 1 1 1 1 1 1 + 1 1 1 1 1 1 1 1 1 1 1 1 1)
+(define world-map '#(#(0 0 0 0 0 0 ++ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+                         #(0 0 0 0 0 0 0 0 0 0 0 1 0 0 + 0 0 0 0 0 0 0 0 ++ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 * 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+                         #(0 0 0 0 0 0 0 0 +++ 0 0 + 0 0 0 0 0 0 + i i i 0 0 * 0 0 * 0 0 0 0 0 0 0 0 0 0 + 0 0 0 0 0 s 0 0 0 + 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 * 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+                         #(+ 0 1 0 0 0 0 0 0 0 0 * i i i 0 * * 0 i 0 0 0 0 0 0 +++ 1 1 + 1 i 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 * * * * * * * * 0 0 0 * 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+                         #(+++ + 1 1 * 1 1 ++ ++ + 0 0 + 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 ++ 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 + 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 + 1 1 1 1 1 1 1 1 1 1 1 1 1)
                          ))
 
 
 ;Level dimensions
-(define level-width 30000.0)
+(define level-width 100.0)
 (define level-height 400.0)
+
 
 (define check-collision-player-with-coin
   (lambda (player coin)
@@ -42,6 +43,50 @@
                       #f
                       #t)))))))
 
+(define check-collision-player-with-enemy
+  (lambda (player enemy)
+    (let check-collision (
+                          (leftA (player-posx player))
+                          (rightA (+ (player-posx player) (player-width player)))
+                          (topA (player-posy player))
+                          (bottomA (+ (player-posy player) (player-height player)))
+                          (leftB (enemy-posx enemy))
+                          (rightB (+ (enemy-posx enemy) (enemy-width enemy)))
+                          (topB (enemy-posy enemy))
+                          (bottomB (+ (enemy-posy enemy) (enemy-height enemy))))
+      (if (<= bottomA topB)
+          #f
+          (if (>= topA bottomB)
+              #f
+              (if (<= rightA leftB)
+                  #f
+                  (if (>= leftA rightB)
+                      #f
+                      #t)))))))
+
+(define check-collision-player-with-finish
+  (lambda (player finish)
+    (let check-collision (
+                          (leftA (player-posx player))
+                          (rightA (+ (player-posx player) (player-width player)))
+                          (topA (player-posy player))
+                          (bottomA (+ (player-posy player) (player-height player)))
+                          (leftB (finish-posx finish))
+                          (rightB (+ (finish-posx finish) (finish-width finish)))
+                          (topB (finish-posy finish))
+                          (bottomB (+ (finish-posy finish) (finish-height finish))))
+      (if (<= bottomA topB)
+          #f
+          (if (>= topA bottomB)
+              #f
+              (if (<= rightA leftB)
+                  #f
+                  (if (>= leftA rightB)
+                      #f
+                      #t)))))))
+
+
+
 (define update-player-points-for-take-coin
   (lambda (player coins)
     (let loop ((rest coins))
@@ -51,6 +96,15 @@
                     (coin-posx-set! (car rest) -20)
                     (player-score-set! player (+ (player-score player) (coin-points (car rest)))))
                   (loop (cdr rest)))))))
+
+(define check-player-crash-enemy
+  (lambda (player enemies)
+    (let loop ((rest enemies))
+      (unless (null? rest)
+              (if (check-collision-player-with-enemy player (car rest))
+                  #t
+                  (loop (cdr rest)))))))
+
 
 
 (define collision-down-tiles
@@ -134,7 +188,7 @@
         (car (cdr values)))))
 
 (define (create-tiles-map l)
-  (let loop ((rest-map new-map-world) (rest l) (count-x 0) (count-y 0))
+  (let loop ((rest-map world-map) (rest l) (count-x 0) (count-y 0))
     (if (< count-y 5)
         (begin
           (let create-plataforms ((element (vector-ref (vector-ref rest-map count-y) count-x)))
@@ -159,7 +213,7 @@
         rest)))
 
 (define (create-coins-map l)
-  (let loop ((rest-map new-map-world) (rest l) (count-x 0) (count-y 0))
+  (let loop ((rest-map world-map) (rest l) (count-x 0) (count-y 0))
     (if (< count-y 5)
         (begin
           (case (vector-ref (vector-ref rest-map count-y) count-x)
@@ -187,7 +241,7 @@
         rest)))
 
 (define (create-enemies-map l)
-  (let loop ((rest-map new-map-world) (rest l) (count-x 0) (count-y 0))
+  (let loop ((rest-map world-map) (rest l) (count-x 0) (count-y 0))
     (if (< count-y 5)
         (begin
           (case (vector-ref (vector-ref rest-map count-y) count-x)
@@ -220,14 +274,14 @@
            (cond ((= key SDLK_ESCAPE)
                   'exit)
                  ((= key SDLK_RETURN)
-                  (if (eq? (world-gamestates world) 'splashscreen)
+                  (if (or (eq? (world-gamestates world) 'splashscreen) (eq? (world-gamestates world) 'lose) (eq? (world-gamestates world) 'win))
                       (make-world 
                        'gamescreen 
                        (create-tiles-map (world-tiles world))
                        (make-camera
                         0.0
-                        'on
-                        0.2)
+                        'auto
+                        0.1)
                        (make-player
                         400.0
                         450.0 
@@ -308,7 +362,7 @@
                 (key (SDL_Keysym-sym
                       (SDL_KeyboardEvent-keysym kevt))))
            (cond ((= key SDLK_LEFT)
-                  (if (eq? (player-vstate (world-player world)) 'left)
+                  (if (and (eq? (player-vstate (world-player world)) 'left) (eq? (world-gamestates world) 'gamescreen))
                       (make-world
                        (world-gamestates world) 
                        (world-tiles world)
@@ -328,7 +382,7 @@
                      
                       world))
                  ((= key SDLK_RIGHT)
-                  (if (eq? (player-vstate (world-player world)) 'right)
+                  (if (and (eq? (player-vstate (world-player world)) 'right) (eq? (world-gamestates world) 'gamescreen))
                       (make-world 
                        (world-gamestates world) 
                        (world-tiles world)
@@ -389,7 +443,32 @@
           (cairo_set_source_rgba cr 0.0 0.0 0.0 1.0)
           (cairo_set_font_size cr 90.0)
           (cairo_move_to cr 150.0 350.0)
-          (cairo_show_text cr "GREAT!!, HAS DIED"))
+          (cairo_show_text cr "GREAT!!, HAS DIED")
+          
+
+          ;;Reset lists
+          (world-tiles-set! world '())
+          (world-coins-set! world '())
+          (world-enemies-set! world '()))
+
+
+         ((win)
+          (cairo_set_source_rgba cr 0.0 1.0 1.0 0.01)
+          (cairo_rectangle cr 0.0 0.0 1280.0 752.0)
+          (cairo_fill cr)
+
+          (cairo_select_font_face cr "Sans" CAIRO_FONT_SLANT_NORMAL CAIRO_FONT_WEIGHT_BOLD)
+          (cairo_set_source_rgba cr 0.0 0.0 0.0 1.0)
+          (cairo_set_font_size cr 90.0)
+          (cairo_move_to cr 250.0 350.0)
+          (cairo_show_text cr "YOU WIN")
+          
+
+          ;;Reset lists
+          (world-tiles-set! world '())
+          (world-coins-set! world '())
+          (world-enemies-set! world '())
+          )
 
          ((splashscreen)
           (cairo_set_source_rgba cr 0.0 0.0 0.0 1.0)
@@ -512,10 +591,6 @@
                  (if (eq? (camera-state camera) 'on)
                      (camera-position-set! camera (+ (camera-position camera) (* 0.3 delta-time)))))))
 
-          ;;Control limits X
-          ;; (if (or (< (player-posx (world-player world)) 0) (> (+ (player-posx (world-player world)) (player-width (world-player world))) level-width))
-          ;;     (player-posx-set! (world-player world) (+ (player-posx (world-player world)) (* 0.3 delta-time))))
-
           
           (if (eq? (player-hstate (world-player world)) 'up) 
               (if (collision-down-tiles (world-player world) (world-tiles world))
@@ -558,7 +633,7 @@
           (if (< (camera-position (world-camera world)) 0)
               (camera-position-set! (world-camera world) 0))
           (if (> (camera-position (world-camera world)) (- level-width (camera-position (world-camera world))))
-              (camera-position-set! (world-camera world) (- level-width (camera-position (world-camera world)))))
+              (world-gamestates-set! world 'win))
 
 
           ;;Exceder a camara
@@ -574,6 +649,10 @@
 
           ;;Que la camara te coma
           (if (< (- (player-posx (world-player world)) (camera-position (world-camera world))) (* -1 (player-width (world-player world))))
+              (world-gamestates-set! world 'lose))
+
+          ;;Que un enemigo se choque con el jugador
+          (if (check-player-crash-enemy (world-player world) (world-enemies world))
               (world-gamestates-set! world 'lose))
 
 
@@ -601,7 +680,7 @@
     'splashscreen
     '()
     'none
-    'none
+    (make-player 0 0 0 0 'none 'none 0)
     '()
     '()
     "")))

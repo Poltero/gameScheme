@@ -140,6 +140,13 @@
           '()))))
 
 
+
+(define condition-short
+  (lambda (condition values)
+    (if condition
+        (car values)
+        (car (cdr values)))))
+
 (define (create-tiles-map l)
   (let loop ((rest-map new-map-world) (rest l) (count-x 0) (count-y 0))
     (if (< count-y 5)
@@ -174,28 +181,19 @@
              (let create-plataform-with-coins ((number 0) (posx (+ (+ 0 (* 40 4)) (* count-x 100))))
                (if (< number 4)
                    (begin
-                     (set! rest (cons (make-coin (exact->inexact (+ posx 10)) (exact->inexact (* (+ 0.7 count-y) 
-                                                                                                 (if (< count-y 2)
-                                                                                                     98
-                                                                                                     102))) 15.0 15.0 10 'yellow) rest))
+                     (set! rest (cons (make-coin (exact->inexact (+ posx 10)) (exact->inexact (* (+ 0.7 count-y) (condition-short (< count-y 2) '(98 102)))) 15.0 15.0 10 'yellow) rest))
                      (create-plataform-with-coins (+ number 1) (+ posx 40))))))
             ((++)
              (let create-plataform-with-coins-special ((number 0) (posx (+ (+ 0 (* 40 4)) (* count-x 100))))
                (if (< number 1)
                    (begin
-                     (set! rest (cons (make-coin (exact->inexact (+ posx 10)) (exact->inexact (* (+ 0.7 count-y) 
-                                                                                                (if (< count-y 2)
-                                                                                                     88
-                                                                                                     102) )) 15.0 15.0 50 'green) rest))
+                     (set! rest (cons (make-coin (exact->inexact (+ posx 10)) (exact->inexact (* (+ 0.7 count-y) (condition-short (< count-y 2) '(88 102)) )) 15.0 15.0 50 'green) rest))
                      (create-plataform-with-coins-special (+ number 1) (+ posx 40))))))
             ((+++)
              (let create-plataform-with-coins-doubles ((number 0) (posx (+ (+ 0 (* 40 4)) (* count-x 100))))
                (if (< number 8)
                    (begin
-                     (set! rest (cons (make-coin (exact->inexact (+ posx 10)) (exact->inexact (* (+ 0.7 count-y) 
-                                                                                                 (if (< count-y 2)
-                                                                                                     98
-                                                                                                     102))) 15.0 15.0 10 'yellow) rest))
+                     (set! rest (cons (make-coin (exact->inexact (+ posx 10)) (exact->inexact (* (+ 0.7 count-y) (condition-short (< count-y 2) '(98 102)))) 15.0 15.0 10 'yellow) rest))
                      (create-plataform-with-coins-doubles (+ number 1) (+ posx 40)))))))
           (if (< count-x 101)
               (loop rest-map rest (+ count-x 1) count-y)
@@ -502,54 +500,6 @@
           (cairo_move_to cr 400.0 200.0)
           (cairo_show_text cr (world-message world))
 
-          ;;calculate tiles in the world and paint
-          
-          ;; (cairo_set_source_rgba cr 1.0 1.0 1.0 1.0)
-          ;; (let loop ((count-tiles (/ 5000 20)) (posx 0.0))
-          ;;   (if (= count-tiles 0)
-          ;;       '()
-          ;;       (begin (cairo_rectangle cr (- posx (camera-position (world-camera world))) 400.0 20.0 20.0)
-          ;;              (cairo_fill cr)
-          ;;              (loop (- count-tiles 1) (+ posx 20.0)))))
-
-
-          
-          ;;paint tile test
-
-          ;; (let paint-tile-test ((tile (world-tile world)))
-          ;;   (cairo_set_source_rgba cr 1.0 1.0 1.0 1.0)
-          ;;   (cairo_rectangle cr (tile-posx tile) (tile-posy tile) (tile-width tile) (tile-height tile))
-          ;;   (cairo_fill cr))
-
-
-          ;; (if (collision-tiles (world-player world) (world-tiles world))
-          ;;     (println "Collision!")
-          ;;     (println "Nothing!"))
-          
-
-          
-          ; Drawing all map in the world
-          ;; (let loop-map ((rest-map map-world) (count-y 0) (tileslist (world-tiles world)))
-          ;;   (if (eq? flag-paint-map #t)
-          ;;       (if (= count-y 3)
-          ;;           (set! flag-paint-map #f)
-          ;;           (begin 
-          ;;             (case (vector-ref (vector-ref rest-map count-y) count-x)
-          ;;               ((1)
-          ;;                (let create-plataform-normal ((pos-y (* (+ count-y 0.7) 100)) (pos-x 1300) (counter 0))
-          ;;                  (if (= counter 4)
-          ;;                      '()
-          ;;                      (begin 
-          ;;                        (world-tiles-set! world (cons (make-tile (exact->inexact pos-x) (exact->inexact pos-y) 40.0 40.0) (world-tiles world)))
-          ;;                        (create-plataform-normal pos-y (+ pos-x 40) (+ counter 1)))))))
-          ;;             (loop-map rest-map (+ count-y 1) tileslist)))))
-
-          ;;Generate all map
-          
-          
-
-          ;; (if (= position-y-origin 0)
-          ;;     (set! position-y-origin (player-posy (world-player world))))
           
         
           ;;Calculate points collision down and top
@@ -659,10 +609,6 @@
           
 
           ;;Set camera
-          
-          ;;Center the camera over the player
-          ;(camera-position-set! (world-camera world) (- (/ (+ (player-posx (world-player world)) (player-width (world-player world))) 2) (/ screen-width 2.0)))
-
           (if (eq? (camera-state (world-camera world)) 'auto)
               (camera-position-set! (world-camera world) (+ (camera-position (world-camera world)) (* (camera-speed (world-camera world)) delta-time))))
 
@@ -674,29 +620,6 @@
           (if (> (camera-position (world-camera world)) (- level-width (camera-position (world-camera world))))
               (camera-position-set! (world-camera world) (- level-width (camera-position (world-camera world)))))
 
-
-          ;; (if (> (player-posx (world-player world)) screen-width)
-          ;;    (camera-position-set! (world-camera world) (- screen-width (camera-position (world-camera world)))))
-          
-          
-          
-
-          ;; (if (collision-down-tiles (world-player world) (world-tiles world))
-          ;;     (println "Collision Down!"))
-          
-          
-          ;; (if (> (+ (player-posx (world-player world)) (camera-position (world-camera world))) 800)
-          ;;     (begin
-          ;;       (camera-position-set! (world-camera world) (- (camera-position (world-camera world)) (* 0.5 delta-time)))
-          ;;       )
-          ;;     (println "Posx: " (object->string (player-posx (world-player world)))))
-
-
-          ;; (if (and (not(eq? (player-hstate (world-player world)) 'left)) (not (eq? (player-hstate (world-player world)) 'right)))
-          ;;     (let decrement-position-player ((player (world-player world)))
-          ;;       (player-posx-set! player (- (player-posx player) (* 0.09 delta-time)))))
-
-          
 
           ;;Exceder a camara
           (if (> (- (player-posx (world-player world)) (camera-position (world-camera world))) 1280.0)
@@ -718,15 +641,11 @@
           (cairo_set_source_rgba cr 1.0 0.0 0.0 1.0)
           (let drawing-player ((player (world-player world)))
             (cairo_rectangle cr (- ( player-posx player) (camera-position (world-camera world))) (player-posy player) (player-width player) (player-height player)))
-          
           (cairo_fill cr)
           
-          ;; (cairo_rectangle cr (+ 250.0 20) 360.0 10.0 10.0)
-          ;; (cairo_fill cr)
 
 
-
-          ;; Drawing enemy principal
+          ;; Drawing enemy principal (para mapas con camara automatica)
           ;; (cairo_set_source_rgba cr 1.0 0.0 0.0 1.0)
           ;; (let drawing-enemy-principal ((enemy (world-enemy world)))
           ;;   (cairo_rectangle cr (enemy-posx enemy) (enemy-posy enemy) (enemy-width enemy) (enemy-height enemy)))

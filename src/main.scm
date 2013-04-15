@@ -174,19 +174,28 @@
              (let create-plataform-with-coins ((number 0) (posx (+ (+ 0 (* 40 4)) (* count-x 100))))
                (if (< number 4)
                    (begin
-                     (set! rest (cons (make-coin (exact->inexact (+ posx 10)) (exact->inexact (* (+ 0.7 count-y) 102)) 15.0 15.0 10 'yellow) rest))
+                     (set! rest (cons (make-coin (exact->inexact (+ posx 10)) (exact->inexact (* (+ 0.7 count-y) 
+                                                                                                 (if (< count-y 2)
+                                                                                                     98
+                                                                                                     102))) 15.0 15.0 10 'yellow) rest))
                      (create-plataform-with-coins (+ number 1) (+ posx 40))))))
             ((++)
              (let create-plataform-with-coins-special ((number 0) (posx (+ (+ 0 (* 40 4)) (* count-x 100))))
                (if (< number 1)
                    (begin
-                     (set! rest (cons (make-coin (exact->inexact (+ posx 10)) (exact->inexact (* (+ 0.7 count-y) 102)) 15.0 15.0 50 'green) rest))
+                     (set! rest (cons (make-coin (exact->inexact (+ posx 10)) (exact->inexact (* (+ 0.7 count-y) 
+                                                                                                (if (< count-y 2)
+                                                                                                     88
+                                                                                                     102) )) 15.0 15.0 50 'green) rest))
                      (create-plataform-with-coins-special (+ number 1) (+ posx 40))))))
             ((+++)
              (let create-plataform-with-coins-doubles ((number 0) (posx (+ (+ 0 (* 40 4)) (* count-x 100))))
                (if (< number 8)
                    (begin
-                     (set! rest (cons (make-coin (exact->inexact (+ posx 10)) (exact->inexact (* (+ 0.7 count-y) 102)) 15.0 15.0 10 'yellow) rest))
+                     (set! rest (cons (make-coin (exact->inexact (+ posx 10)) (exact->inexact (* (+ 0.7 count-y) 
+                                                                                                 (if (< count-y 2)
+                                                                                                     98
+                                                                                                     102))) 15.0 15.0 10 'yellow) rest))
                      (create-plataform-with-coins-doubles (+ number 1) (+ posx 40)))))))
           (if (< count-x 101)
               (loop rest-map rest (+ count-x 1) count-y)
@@ -381,7 +390,7 @@
      (lambda (cr time world)
        (set! delta-time (- time last-time))
        (set! last-time time)
-       (println (string-append "Position camera " (object->string (world-camera world)) " position-x: " (object->string (world-player world))))
+       ;(println (string-append "Position camera " (object->string (world-camera world)) " position-x: " (object->string (world-player world))))
        ;;(SDL_LogInfo SDL_LOG_CATEGORY_APPLICATION (object->string (SDL_GL_Extension_Supported "GL_EXT_texture_format_BGRA8888")))
        
        

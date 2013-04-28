@@ -106,6 +106,25 @@
                   (loop (cdr rest)))))))
 
 
+;;Collision bottom
+
+(define check-collision-bottom
+  (lambda (player tiles)
+    (let loop ((rest tiles))
+      (unless (null? rest)
+              (let check-collision (
+                                    (leftA (player-posx player))
+                                    (rightA (+ (player-posx player) (player-width player)))
+                                    (bottomA (+ (player-posy player) (player-height player)))
+                                    (leftB (tile-posx (car rest)))
+                                    (topB (tile-posy (car rest)))
+                                    (bottomB (+ (tile-posy (car rest)) (tile-height (car rest))))
+                                    (rightB (+ (tile-posx (car rest)) (tile-width (car rest)))))
+                (if (and (> bottomA (- topB 15)) (< bottomA bottomB) (>= rightA leftB) (<= leftA rightB))
+                    #t
+                    (loop (cdr rest))))))))
+
+
 
 (define collision-down-tiles
   (lambda (player tileslist)
@@ -130,6 +149,46 @@
                    (< (enemy-posy enemy) (tile-posy (car rest))))
               #t
               (loop (cdr rest)))))))
+
+;;Collsion tiles left
+
+(define check-collision-left-tiles
+  (lambda (player tiles)
+    (let loop ((rest tiles))
+      (unless (null? rest)
+              (let ckeck-collision (
+                                    (rightA (+ (player-posx player) (player-width player)))
+                                    (topA (player-posy player))
+                                    (bottomA (+ (player-posy player) (player-height player)))
+                                    (leftB (tile-posx (car rest)))
+                                    (leftA (player-posx player))
+                                    (topB (tile-posy (car rest)))
+                                    (bottomB (+ (tile-posy (car rest)) (tile-height (car rest)))))
+                (if (and  (>= bottomA (+ topB 5)) (<= topA bottomB) (>= rightA (- leftB 10)) (<= leftA leftB))
+                    #t
+                    (loop (cdr rest))))))))
+
+
+;;Collsion tiles right
+
+(define check-collision-right-tiles
+  (lambda (player tiles)
+    (let loop ((rest tiles))
+      (unless (null? rest)
+              (let ckeck-collision (
+                                    (rightA (+ (player-posx player) (player-width player)))
+                                    (topA (player-posy player))
+                                    (bottomA (+ (player-posy player) (player-height player)))
+                                    (leftB (tile-posx (car rest)))
+                                    (rightB (+ (tile-posx (car rest)) (tile-width (car rest))))
+                                    (leftA (player-posx player))
+                                    (topB (tile-posy (car rest)))
+                                    (bottomB (+ (tile-posy (car rest)) (tile-height (car rest)))))
+                (if (and  (>= bottomA (+ topB 5)) (<= topA bottomB) (<= leftA (+ rightB 10)) (>= leftA leftB))
+                    #t
+                    (loop (cdr rest))))))))
+
+
 
 (define collision-right-tiles
   (lambda (player tileslist)
@@ -280,7 +339,7 @@
                        (create-tiles-map (world-tiles world))
                        (make-camera
                         0.0
-                        'auto
+                        'on
                         0.1)
                        (make-player
                         400.0
@@ -504,6 +563,9 @@
 
           (cairo_move_to cr 1100.0 100.0)
           (cairo_show_text cr (number->string (player-score (world-player world))))
+          
+          (cairo_move_to cr 10.0 10.0)
+          (cairo_show_text cr "Y")
 
           ;; Debug
           ;; (cairo_set_source_rgba cr 1.0 1.0 1.0 1.0)
@@ -577,14 +639,14 @@
 
 
 
-          (if (eq? (player-vstate (world-player world)) 'left)
+          (if (and (eq? (player-vstate (world-player world)) 'left) (not (check-collision-right-tiles (world-player world) (world-tiles world))))
               (let player-left ((camera (world-camera world)) (tiles (world-tiles world)) (player (world-player world)))
                (begin
                  (player-posx-set! player (- (player-posx player) (* 0.3 delta-time)))
                  (if (eq? (camera-state camera) 'on)
                      (camera-position-set! camera (- (camera-position camera) (* 0.3 delta-time)))))))
 
-          (if (eq? (player-vstate (world-player world)) 'right)
+          (if (and (eq? (player-vstate (world-player world)) 'right) (not (check-collision-left-tiles (world-player world) (world-tiles world))))
              (let player-right ((camera (world-camera world)) (tiles (world-tiles world)) (player (world-player world)))
                (begin
                  (player-posx-set! player (+ (player-posx player) (* 0.3 delta-time)))
@@ -593,9 +655,12 @@
 
           
           (if (eq? (player-hstate (world-player world)) 'up) 
-              (if (collision-down-tiles (world-player world) (world-tiles world))
+              (if (check-collision-bottom (world-player world) (world-tiles world))
                   (player-hstate-set! (world-player world) 'jump)
                   (player-hstate-set! (world-player world) 'down)))
+
+
+          (println (string-append "hstate: " (object->string (player-hstate (world-player world)))))
 
 
           (if (eq? (player-hstate (world-player world)) 'jump) 
@@ -607,7 +672,7 @@
                       (player-posy-set! player (- (player-posy player) (* 0.3 delta-time)))))
                   (player-hstate-set! (world-player world) 'down)))
 
-          (if (and (eq? (player-hstate (world-player world)) 'down) (not (collision-down-tiles (world-player world) (world-tiles world))))
+          (if (and (eq? (player-hstate (world-player world)) 'down) (not (check-collision-bottom (world-player world) (world-tiles world))))
               (let player-down ((player (world-player world)))
                 (player-posy-set! player (+ (player-posy player) (* 0.3 delta-time)))))
           
@@ -652,8 +717,8 @@
               (world-gamestates-set! world 'lose))
 
           ;;Que un enemigo se choque con el jugador
-          (if (check-player-crash-enemy (world-player world) (world-enemies world))
-              (world-gamestates-set! world 'lose))
+          ;; (if (check-player-crash-enemy (world-player world) (world-enemies world))
+          ;;     (world-gamestates-set! world 'lose))
 
 
           ;; Drawing player

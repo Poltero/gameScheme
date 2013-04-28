@@ -164,7 +164,7 @@
                                     (leftA (player-posx player))
                                     (topB (tile-posy (car rest)))
                                     (bottomB (+ (tile-posy (car rest)) (tile-height (car rest)))))
-                (if (and  (>= bottomA (+ topB 5)) (<= topA bottomB) (>= rightA (- leftB 10)) (<= leftA leftB))
+                (if (and  (>= bottomA (+ topB 5)) (<= topA bottomB) (>= rightA (- leftB 13)) (<= leftA leftB))
                     #t
                     (loop (cdr rest))))))))
 
@@ -184,7 +184,7 @@
                                     (leftA (player-posx player))
                                     (topB (tile-posy (car rest)))
                                     (bottomB (+ (tile-posy (car rest)) (tile-height (car rest)))))
-                (if (and  (>= bottomA (+ topB 5)) (<= topA bottomB) (<= leftA (+ rightB 10)) (>= leftA leftB))
+                (if (and  (>= bottomA (+ topB 5)) (<= topA bottomB) (<= leftA (+ rightB 13)) (>= leftA leftB))
                     #t
                     (loop (cdr rest))))))))
 
@@ -343,7 +343,7 @@
                         0.1)
                        (make-player
                         400.0
-                        450.0 
+                        445.0 
                         30.0
                         30.0
                         'none

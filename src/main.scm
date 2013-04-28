@@ -106,7 +106,7 @@
                   (loop (cdr rest)))))))
 
 
-;;Collision bottom
+;;Collision bottom player
 
 (define check-collision-bottom
   (lambda (player tiles)
@@ -120,23 +120,42 @@
                                     (topB (tile-posy (car rest)))
                                     (bottomB (+ (tile-posy (car rest)) (tile-height (car rest))))
                                     (rightB (+ (tile-posx (car rest)) (tile-width (car rest)))))
-                (if (and (> bottomA (- topB 15)) (< bottomA bottomB) (>= rightA leftB) (<= leftA rightB))
+                (if (and (> bottomA (- topB 16)) (< bottomA bottomB) (>= rightA leftB) (<= leftA rightB))
+                    #t
+                    (loop (cdr rest))))))))
+
+
+;;Collision bottom enemy
+
+(define check-collision-bottom-enemy
+  (lambda (enemy tiles)
+    (let loop ((rest tiles))
+      (unless (null? rest)
+              (let check-collision (
+                                    (leftA (enemy-posx enemy))
+                                    (rightA (+ (enemy-posx enemy) (enemy-width enemy)))
+                                    (bottomA (+ (enemy-posy enemy) (enemy-height enemy)))
+                                    (leftB (tile-posx (car rest)))
+                                    (topB (tile-posy (car rest)))
+                                    (bottomB (+ (tile-posy (car rest)) (tile-height (car rest))))
+                                    (rightB (+ (tile-posx (car rest)) (tile-width (car rest)))))
+                (if (and (> bottomA (- topB 12)) (< bottomA bottomB) (>= rightA leftB) (<= leftA rightB))
                     #t
                     (loop (cdr rest))))))))
 
 
 
-(define collision-down-tiles
-  (lambda (player tileslist)
-    (let loop ((rest tileslist))
-      (unless (null? rest)
-          (if (and
-               (or (> (player-posx player) (tile-posx (car rest))) (> (+ (player-posx player) 40) (tile-posx (car rest))))
-                   (< (player-posx player) (+ (tile-posx (car rest)) 40))
-                   (> (player-posy player) (- (tile-posy (car rest)) 39))
-                   (< (player-posy player) (tile-posy (car rest))))
-              #t
-              (loop (cdr rest)))))))
+;; (define collision-down-tiles
+;;   (lambda (player tileslist)
+;;     (let loop ((rest tileslist))
+;;       (unless (null? rest)
+;;           (if (and
+;;                (or (> (player-posx player) (tile-posx (car rest))) (> (+ (player-posx player) 40) (tile-posx (car rest))))
+;;                    (< (player-posx player) (+ (tile-posx (car rest)) 40))
+;;                    (> (player-posy player) (- (tile-posy (car rest)) 39))
+;;                    (< (player-posy player) (tile-posy (car rest))))
+;;               #t
+;;               (loop (cdr rest)))))))
 
 (define collision-down-tiles-enemy
   (lambda (enemy tileslist)
@@ -343,7 +362,7 @@
                         0.1)
                        (make-player
                         400.0
-                        445.0 
+                        440.0 
                         30.0
                         30.0
                         'none
@@ -626,7 +645,7 @@
           (let loop ((rest (world-enemies world)))
             (if (not (null? rest))
                 (begin
-                  (if (not (collision-down-tiles-enemy (car rest) (world-tiles world)))
+                  (if (not (check-collision-bottom-enemy (car rest) (world-tiles world)))
                       (begin
                         (enemy-posx-set! (car rest) (- (enemy-posx (car rest)) (* 0.1 delta-time)))
                         (enemy-posy-set! (car rest) (+ (enemy-posy (car rest)) (* 0.1 delta-time))))
@@ -717,8 +736,8 @@
               (world-gamestates-set! world 'lose))
 
           ;;Que un enemigo se choque con el jugador
-          ;; (if (check-player-crash-enemy (world-player world) (world-enemies world))
-          ;;     (world-gamestates-set! world 'lose))
+          (if (check-player-crash-enemy (world-player world) (world-enemies world))
+              (world-gamestates-set! world 'lose))
 
 
           ;; Drawing player
